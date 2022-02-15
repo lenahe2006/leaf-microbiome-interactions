@@ -1,0 +1,87 @@
+library(dplyr)\library(igraph)\library(bnlearn)
+#read all snp  file
+SNP198<-read.csv(file = 'leaf_SNP_0_1_xiuzheng.csv',header = T,sep = ',')
+SNP198<-SNP198[,-1]
+leaf_po<-read.table(file = 'leaf_Position.txt',header = T,sep = '\t')
+SNP198<-cbind(leaf_po,SNP198)
+SNP198<-SNP198[,-1]
+SNP198<-as.matrix(SNP198)
+SNP198<-as.numeric(SNP198)
+SNP198<-matrix(SNP198,nrow=186161,ncol=199)
+#read significant snp file
+M1<-read.table(file = 'leaf_significantSNP.txt',header = T,sep = '\t')
+M1<-as.matrix(M1)
+M2<-as.matrix(as.numeric(M1[,3]))
+
+library(dplyr)
+#read heatmap file
+rat_alt<-read.csv(file = 'rat_altruism_heatmap_0_1.csv',header = T,sep = ',')
+rat_alt<-rat_alt[,-1]
+rat_alt<-as.matrix(rat_alt)
+#subset the significant snp
+b<-matrix(ncol = 199)
+for(i in 2636:2638){
+  a<-SNP198[which(SNP198[,1]== M2[i,1]),]
+  b<-rbind(b,a)
+}
+b<-b[-1,]
+b<-b[-118,]
+b<-b[-9,]
+#write.csv(b,file = 'b.csv')
+b1<-b[-118,]
+#b1<-b1[-102,]
+b1<-t(b)
+b1<-b1[-1,]
+B<-cbind(rat_alt[,6],b1)
+colnames(B)<-c('phenotypes',1:3)
+B<-as.data.frame(B)
+B1<-B[,-1]
+#按基因型分类计算表型的均值
+library(dplyr)
+B_<-matrix(ncol = 2,nrow = 2)
+for(i in 2:4){
+  count_phenomeans_diffgenetype<-B %>% select(phenotypes,B[,i]) %>%
+    group_by(B[,i]) %>% summarise_at(vars(phenotypes),mean)
+  count_mean<-as.matrix(count_phenomeans_diffgenetype)
+  B_<-cbind(B_,count_mean)
+}
+B_<-B_[,-c(1:2)]
+
+#样品按照基因型分类，重新对应表型数据
+A_<-matrix()
+for(i in 1:3){
+  for(j in 1:198){
+    n<-2*i-1
+    a1<-B_[which(B1[j,i]== B_[,n]),n+1]
+    A_<-rbind(A_,a1)
+  }
+}
+A_<-A_[-1,]
+A1_<-matrix(A_,nrow = 198)
+
+
+#计算贝叶斯网络
+library(bnlearn)
+bn_<-hc(as.data.frame(A1_))
+plot(bn_)
+bn1_<-amat(bn_)
+library(igraph)
+net_1<-graph.adjacency(bn1_,mode = 'directed')
+net_2<-graph.adjacency(bn1_,mode = 'directed')
+net_3<-graph.adjacency(bn1_,mode = 'directed')
+net_4<-graph.adjacency(bn1_,mode = 'directed')
+net_5<-graph.adjacency(bn1_,mode = 'directed')
+net_6<-graph.adjacency(bn1_,mode = 'directed')
+sort(degree(net_6))
+V(net_6)$color<-'#1c86EE'
+V(net_6)[degree(net_6)>1]$color<-'#228B22'
+V(net_4)[c('2077')]$color<-'#228B22'
+net_all<-net_1+net_2+net_3+net_4+net_6
+net_all<-net_1+net_3+net_4
+#plot(net_1,main='Con_mutualism',layout=layout_in_circle,label.color='black',edge.color='#483D8B',edge.arrow.size=1,
+     #vertex.size=13,vertex.label.cex=1)
+plot(net_6,main='P(u)_altruism',layout=layout.fruchterman.reingold,label.color='black',edge.color='#483D8B',edge.arrow.size=1,
+        vertex.size=13,vertex.label.cex=0.9)
+m<-get.edgelist(net_all)
+write.csv(m,file = 'rat_altruism_all.csv')
+                                               

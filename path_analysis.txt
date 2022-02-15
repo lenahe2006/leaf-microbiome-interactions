@@ -1,0 +1,60 @@
+#gy
+df<-read.table("E:/叶际结果/fecundity_snp/rat_2012_gene_fecundity_SNP(1).txt")
+snp<-as.matrix(df[,1])
+df<-t(df[,-1])
+heatmap<-read.table("E:/叶际数据/rat_2012/rat_mutu_2012_heatmap.csv",sep=",")
+h_name<-as.matrix(colnames(heatmap))
+library(infotheo)
+library(vcd)
+m<-matrix(ncol=3)
+for (j in(1:ncol(df))){
+for (i in (1:ncol(heatmap))){
+  m1<-discretize(heatmap[,i],"equalwidth",2)
+  m2<-cbind(df[,j],m1)
+  colnames(m2)<-c("x1","x2")
+  my_table<-table(m2$x1,m2$x2)
+  b<-assocstats(my_table)
+  b1<-as.matrix(b$cramer)
+  x1<-cbind(b1,snp[j,],h_name[i,])
+  m<-rbind(m,x1)
+  
+}}
+m<-m[-1,]
+m<-as.matrix(m)
+write.table(m,file="E:/叶际结果/path_anlysis/rat_mutu_2012_gy.csv",sep=",")
+#yz
+df1<-read.table("E:/叶际数据/fecundity/ram_2012_average_fecundity.csv",sep=",")
+heatmap<-read.table("E:/叶际数据/ram_2012/ram_mutu_2012_heatmap.csv",sep=",")
+m<-matrix(ncol=2)
+df2<-c("con","cu","bu","eu","gu","pu")
+df2<-as.matrix(df2)
+for (i in (1:6)){
+  a<-as.matrix(heatmap[,i])
+  a2<-as.matrix(cor(a,df1[,2],method = "pearson"))
+  a3<-cbind(a2,df2[i,1])
+  m<-rbind(m,a3)
+}
+m<-m[-1,]
+m<-as.matrix(m)
+write.table(m,file="E:/叶际结果/path_anlysis/ram_mutu_2012_yz.csv",sep=",")
+
+#gz
+m<-matrix(ncol=2)
+df1<-as.matrix(read.table("E:/叶际数据/fecundity/ada_2013_average_fecundity.csv",sep=","))[,2]
+df1<-as.matrix(df1)
+m1<-discretize(df1,"equalwidth",2)
+df<-read.table("E:/叶际结果/fecundity_snp/ada_2013_gene_fecundity_SNP(1).txt")
+snp<-as.matrix(df[,1])
+df<-t(df[,-1])
+for (i in (1:ncol(df))){
+  m2<-cbind(df[,i],m1)
+  colnames(m2)<-c("x1","x2")
+  my_table<-table(m2$x1,m2$x2)
+  b<-assocstats(my_table)
+  b1<-as.matrix(b$cramer)
+  x1<-cbind(b1,snp[i,])
+  m<-rbind(m,x1)
+}
+m<-m[-1,]
+m<-as.matrix(m)
+write.table(m,file="E:/叶际结果/path_anlysis/ada_2013_gz.csv",sep=",")

@@ -1,0 +1,38 @@
+library("plyr")
+#read the network_edge file
+file<-read.table("_edge.csv",sep=",")
+file1<-file[,1]
+file2<-file[,2]
+file1<-as.matrix(file1)
+file1<-apply(file1,2,as.numeric)
+file2<-as.matrix(file2)
+file2<-apply(file2,2,as.numeric)
+file_1<-unique(file1)
+file_2<-unique(file2)
+file3<-rbind(file_1,file_2)
+file3<-file3[duplicated(file3)]           #file3 is the howk/dove
+file_1<-apply(file_1,2,as.numeric)
+fin_1<-subset(file_1,!(file_1%in%file3))  #fin_1 is howk
+fin_2<-subset(file_2,!(file_2%in%file3))  #fin_2 isdove
+list1 <- list()
+list1[[1]] <- data.frame(t(fin_1))
+list1[[2]] <- data.frame(t(fin_2))
+list1[[3]] <- data.frame(t(file3))
+u <- rbind.fill(list1)
+u<-t(u)
+write.table(u,file="_node.csv",sep=",")
+ad<-file[which(file[,1]%in%fin_1&file[,2]%in%file3),]#hawk/ hawk~dove
+ad<-ad[,-3]
+ad<-ad[,-3]
+ad2<-file[which(file[,1]%in%file3&file[,2]%in%fin_2),]#hawk/ hawk~dove
+ad2<-ad2[,-3]
+ad2<-ad2[,-3]
+
+list2 <- list()
+list2[[1]] <- data.frame(t(ad))
+list2[[2]] <- data.frame(t(ad2))
+u2 <- rbind.fill(list2)
+u2<-t(u2)
+colnames(u2)<-c("H","D/H","D/H","D")
+write.table(u2,file="_zhu.csv",sep=",")
+#then calculate the abundance the plot it

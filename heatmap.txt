@@ -1,0 +1,67 @@
+#for one heatmap（ada_alt_2012)
+library(igraph)
+library("data.table")
+
+file.fread <- fread('ada_alt_2012_01.csv', sep = ',', header = F)
+y<-file.fread
+y<-as.matrix(y)
+y<-y[,-1]
+y<-as.matrix(y)
+y[which(y<0.99)]<-0
+
+y<-t(y)
+
+l<-(1:400)
+x3<-rep(l,400-l)
+
+
+
+x3<-matrix(x3)
+m<-matrix()
+for(n in 2:400){
+  x1<-seq(n,400)
+  m<-c(m,x1)
+}
+m<-matrix(m)
+m<-m[-1,]
+o<-cbind(x3,m)
+
+
+M2<-matrix()
+for(i in 1:197){
+  agg_2<-cbind(o,y[,i])
+  agg_2delete<-as.factor(agg_2[-which(agg_2[,3]==0),])
+  m<-matrix(agg_2delete,ncol = 3)
+  m<-rbind(m,m)
+  net_agg<-graph_from_data_frame(m[,1:2],directed = T)
+  con1<-mean(degree(net_agg))
+  con1<-con1/2
+  cu<-mean(closeness(net_agg))
+  B2<-mean(betweenness(net_agg)) 
+  E2<-mean(eccentricity(net_agg))
+  G2<-mean(eigen_centrality(net_agg)$vector)
+  P2<-mean(page.rank(net_agg)$vector)
+  M2<-c(M2,con1,cu,B2,E2,G2,P2)
+}
+M2<-matrix(M2)
+M2<-M2[-1,]
+M2<-matrix(M2,nrow=6)
+M3<-t(M2)
+colnames(M3)<-c("con","cu","Bu","Eu","Gu","Pu")
+#根据列进行01化（列表示网络特征值）
+M3<-as.matrix(M3)
+m1 <-matrix()
+for(j in 1:6){
+  for(i in 1:197){
+    x1<-(M3[i,j]-min(M3[,j]))/(max(M3[,j]-min(M3[,j])))
+    m1 <- rbind(m1,x1)
+    
+  }
+}
+m1<-m1[-1,]
+
+m1<-matrix(m1,ncol=6,nrow=197)
+colnames(m1)<-c("con","cu","Bu","Eu","Gu","Pu")
+write.table(m1,file="ada_alt_2012_heatmap.csv",sep=",")
+pheatmap(m1,scale = 'none',color = colorRampPalette(colors = c('blue','white','red'))(100),
+         show_rownames = T,fontsize = 10,fontsize_row = 4,cluster_cols=F,cluster_row = FALSE,cellwidth = 50, cellheight = 2,cluster_col = FALSE)

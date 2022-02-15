@@ -1,0 +1,173 @@
+df <- read.csv("ada_2012.csv")
+df <- df[,-1]
+df<-df[-1,]
+
+df<-log(df+1)
+wmh <- data.frame()
+for(i in 1:176){
+  res <- combn(df[i,],2)
+  
+  rea1 <- unlist(res,use.names = TRUE)
+  
+  num1 <- seq(1,length(rea1),2)
+  num2 <- seq(2,length(rea1),2)
+  
+  r1 <- rea1[num1]
+  r2 <- rea1[num2]
+  
+  result <- (r1*r2)/abs(r1-r2)
+  
+  wmh <- rbind(wmh,result)
+}
+wmh<-apply(wmh,2,as.numeric)
+wmh[is.na(wmh)]<-0
+wmh[is.nan(wmh)]<-0
+wmh[is.infinite(wmh)]<-0
+
+center <- sweep(wmh, 1, apply(wmh,1,min),'-')
+R <- apply(wmh, 1, max) - apply(wmh,1,min)   
+m<- sweep(center, 1, R, "/")       
+m <- data.frame(m)
+write.table(m,file="ada_mutu_2012_01.csv",sep=",")
+m<-apply(m,2,as.numeric)
+m[which(m<0.99)]<-0
+m1<-apply(m,2,sum)
+l<-(1:400)
+x<-rep(l,400-l)
+x<-matrix(x) #50表示50个otu
+v<-matrix()
+for(n in 2:400){
+  x1<-seq(n,400)
+  v<-c(v,x1)
+}
+v<-as.matrix(v)
+v<-v[-1,]
+v<-as.matrix(v)
+z<-cbind(x,v,m1)  
+z1<-z[-which(z[,3]==0),]
+write.table(z1,file="ada_mutu_2012_edge.csv",sep=",")
+
+
+
+
+wmh <- data.frame()
+for(i in 1:176){
+  res <- combn(df[i,],2)
+  
+  rea1 <- unlist(res,use.names = TRUE)
+  
+  num1 <- seq(1,length(rea1),2)
+  num2 <- seq(2,length(rea1),2)
+  
+  r1 <- rea1[num1]
+  r2 <- rea1[num2]
+  
+  result <- 1/(r1*r2)/abs(r1-r2)
+  
+  wmh <- rbind(wmh,result)
+}
+wmh<-apply(wmh,2,as.numeric)
+wmh[is.na(wmh)]<-0
+wmh[is.nan(wmh)]<-0
+wmh[is.infinite(wmh)]<-0
+
+center <- sweep(wmh, 1, apply(wmh,1,min),'-')
+R <- apply(wmh, 1, max) - apply(wmh,1,min)   
+m<- sweep(center, 1, R, "/")       
+m <- data.frame(m)
+write.table(m,file="ada_anta_2012_01.csv",sep=",")
+m<-apply(m,2,as.numeric)
+m[which(m<0.99)]<-0
+m1<-apply(m,2,sum)
+l<-(1:400)
+x<-rep(l,400-l)
+x<-matrix(x) #50表示50个otu
+v<-matrix()
+for(n in 2:400){
+  x1<-seq(n,400)
+  v<-c(v,x1)
+}
+v<-as.matrix(v)
+v<-v[-1,]
+v<-as.matrix(v)
+z<-cbind(x,v,m1)  
+z1<-z[-which(z[,3]==0),]
+write.table(z1,file="ada_anta_2012_edge.csv",sep=",")
+
+
+
+wmh <- data.frame()
+for(i in 1:176){
+  res <- combn(df[i,],2)
+  
+  rea1 <- unlist(res,use.names = TRUE)
+  
+  num1 <- seq(1,length(rea1),2)
+  num2 <- seq(2,length(rea1),2)
+  
+  r1 <- rea1[num1]
+  r2 <- rea1[num2]
+  
+  result <- r1/r2
+  
+  wmh <- rbind(wmh,result)
+}
+wmh<-apply(wmh,2,as.numeric)
+wmh[which(wmh<1)]<-1/wmh[which(wmh<1)]
+wmh<-apply(wmh,2,as.numeric)
+wmh[is.na(wmh)]<-0
+wmh[is.nan(wmh)]<-0
+wmh[is.infinite(wmh)]<-0
+center <- sweep(wmh, 1, apply(wmh,1,min),'-')
+R <- apply(wmh, 1, max) - apply(wmh,1,min)   
+m<- sweep(center, 1, R, "/")
+m<-data.frame(m)
+write.table(m,file="ada_agg_2012_01.csv",sep=",")
+m1<-m
+m1<-apply(m1,2,as.numeric)
+m1[which(m1<0.99)]<-0
+m1<-apply(m1,2,sum)
+l<-(1:400)
+x<-rep(l,400-l)
+x<-matrix(x) #50表示50个otu
+v<-matrix()
+for(n in 2:400){
+  x1<-seq(n,400)
+  v<-c(v,x1)
+}
+v<-as.matrix(v)
+v<-v[-1,]
+v<-as.matrix(v)
+z<-cbind(x,v,m1)  
+z1<-z[-which(z[,3]==0),]
+write.table(z1,file="ada_agg_2012_edge.csv",sep=",")
+
+
+#alt
+alt<-1-1/wmh
+alt<-apply(alt,2,as.numeric)
+alt[is.na(alt)]<-0
+alt[is.nan(alt)]<-0
+alt[is.infinite(alt)]<-0
+center <- sweep(alt, 1, apply(alt,1,min),'-')
+R <- apply(alt, 1, max) - apply(alt,1,min)   
+m<- sweep(center, 1, R, "/")
+m<-data.frame(m)
+write.table(m,file="ada_alt_2012_01.csv",sep=",")
+m<-apply(m,2,as.numeric)
+m[which(m<0.99)]<-0
+m1<-apply(m,2,sum)
+l<-(1:400)
+x<-rep(l,400-l)
+x<-matrix(x) #50表示50个otu
+v<-matrix()
+for(n in 2:400){
+  x1<-seq(n,400)
+  v<-c(v,x1)
+}
+v<-as.matrix(v)
+v<-v[-1,]
+v<-as.matrix(v)
+z<-cbind(x,v,m1)  
+z1<-z[-which(z[,3]==0),]
+write.table(z1,file="ada_alt_2012_edge.csv",sep=",")

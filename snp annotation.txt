@@ -1,0 +1,30 @@
+import requests
+import pandas as pd
+import time
+
+dict2 = {1: 'NC_003070.9', 2: 'NC_003071.7',
+         3: 'NC_003074.8', 4: 'NC_003075.7', 5: 'NC_003076.8'}
+df = pd.read_excel('E:/snp/data_2501-2969.xlsx')
+for i in range(len(df)):
+    time.sleep(3)
+    chr = df['chr'][i]
+    position = int(df['position'][i])
+    first_position = position - 25
+    second_position = position + 26
+    NC = dict2[int(chr)]
+    url = 'https://www.ncbi.nlm.nih.gov/genome/gdv/browser/exonnav/{}/T1759574/{}/{}'.format(
+        NC, first_position, second_position)
+    print(url)
+    headers = {
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36 Edg/95.0.1020.40'
+    }
+    res = requests.get(url, headers=headers)
+    res.json()
+    result = res.json()
+    if result['content']['region_genes']:
+        print(result['content']['region_genes'][0]['label'])
+        df.loc[i, '基因名称'] = result['content']['region_genes'][0]['label']
+    else:
+        print('没有结果')
+        df.loc[i, '基因名称'] = '-'
+df.to_excel('E:/snp/result_2501-2969.xlsx', index=False)
